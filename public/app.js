@@ -457,3 +457,4 @@ map.on('popupopen', function() {
 console.log('⛵ Karibik Saison loaded with Firebase!');
 console.log('Waiting for authentication...');
 
+// Force redeploy
