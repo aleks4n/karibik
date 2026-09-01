@@ -72,6 +72,7 @@ let wachtfuehrerMembers = [];
 let crewMembers = [];
 let pathsRef = null;
 let drawnPathsMap = new Map();
+let editingPathId = null;
 
 // Initialize Firebase and load paths immediately
 function initializeApp() {
@@ -195,7 +196,7 @@ const createPathBtn = document.getElementById('createPath');
 const pathForm = document.getElementById('pathForm');
 
 // Add person functions
-function addPersonField(listId, type) {
+function addPersonField(listId, type, value = '') {
     const list = document.getElementById(listId);
     const personDiv = document.createElement('div');
     personDiv.className = 'person-input';
@@ -204,7 +205,9 @@ function addPersonField(listId, type) {
         <button type="button" class="remove-person-btn" onclick="this.parentElement.remove()">✕</button>
     `;
     list.appendChild(personDiv);
-    personDiv.querySelector('input').focus();
+    const input = personDiv.querySelector('input');
+    input.value = value;
+    input.focus();
 }
 
 // Modal Functions
@@ -228,12 +231,52 @@ function closeModal() {
     drawnMarkers.forEach(marker => map.removeLayer(marker));
     drawnMarkers = [];
     map.dragging.enable();
+    editingPathId = null;
+    pathForm.reset();
+    document.getElementById('pathColor').value = '#FF6B6B';
+    document.getElementById('pathModalTitle').textContent = 'Create New Sailing Path';
+    document.getElementById('savePath').textContent = 'Save Path';
     // Clear dynamic lists
     document.getElementById('wachtfuehrerList').innerHTML = '';
     document.getElementById('crewList').innerHTML = '';
     // Add one empty field for each
     addPersonField('wachtfuehrerList', 'Wachführer');
     addPersonField('crewList', 'Crew member');
+}
+
+function editPath(pathId) {
+    const path = paths.find(item => item.id === pathId);
+    if (!path) return;
+
+    editingPathId = pathId;
+    isCreatingPath = false;
+    map.dragging.enable();
+    map.closePopup();
+
+    document.getElementById('pathModalTitle').textContent = 'Edit Sailing Trip';
+    document.getElementById('savePath').textContent = 'Save Changes';
+    document.getElementById('pathTitle').value = path.title || '';
+    document.getElementById('startDate').value = path.startDate || '';
+    document.getElementById('endDate').value = path.endDate || '';
+    document.getElementById('skipper').value = path.skipper || '';
+    document.getElementById('pathColor').value = path.color || '#FF6B6B';
+
+    const wachtfuehrerList = document.getElementById('wachtfuehrerList');
+    const crewList = document.getElementById('crewList');
+    wachtfuehrerList.innerHTML = '';
+    crewList.innerHTML = '';
+
+    const wachtfuehrer = Array.isArray(path.wachtfuehrer)
+        ? path.wachtfuehrer
+        : path.wachtfuehrer ? [path.wachtfuehrer] : [];
+    const crew = Array.isArray(path.crew)
+        ? path.crew
+        : path.crew ? [path.crew] : [];
+
+    wachtfuehrer.forEach(name => addPersonField('wachtfuehrerList', 'Wachführer', name));
+    crew.forEach(name => addPersonField('crewList', 'Crew member', name));
+
+    modal.classList.add('show');
 }
 
 closeBtn.addEventListener('click', closeModal);
@@ -261,7 +304,11 @@ document.getElementById('addCrew').addEventListener('click', (e) => {
 pathForm.addEventListener('submit', (e) => {
     e.preventDefault();
     
-    if (pathPoints.length !== 2) {
+    const existingPath = editingPathId === null
+        ? null
+        : paths.find(path => path.id === editingPathId);
+
+    if (!existingPath && pathPoints.length !== 2) {
         alert('Please select exactly 2 points on the map (start and end)');
         return;
     }
@@ -285,8 +332,8 @@ pathForm.addEventListener('submit', (e) => {
     const startDateStr = startDate.toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' });
     const endDateStr = endDate.toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' });
     
-    const newPath = {
-        id: Date.now(),
+    const savedPath = {
+        id: existingPath ? existingPath.id : Date.now(),
         title: document.getElementById('pathTitle').value.trim(),
         startDate: document.getElementById('startDate').value,
         endDate: document.getElementById('endDate').value,
@@ -295,20 +342,23 @@ pathForm.addEventListener('submit', (e) => {
         wachtfuehrer: wachtfuehrerList,
         crew: crewList,
         color: document.getElementById('pathColor').value,
-        startPoint: pathPoints[0],
-        endPoint: pathPoints[1]
+        startPoint: existingPath ? existingPath.startPoint : pathPoints[0],
+        endPoint: existingPath ? existingPath.endPoint : pathPoints[1]
     };
-    
-    paths.push(newPath);
-    drawPath(newPath);
-    savePathToFirebase(newPath);
+
+    if (existingPath) {
+        const index = paths.findIndex(path => path.id === existingPath.id);
+        paths[index] = savedPath;
+        removePath(savedPath.id);
+    } else {
+        paths.push(savedPath);
+    }
+
+    drawPath(savedPath);
+    savePathToFirebase(savedPath);
     closeModal();
-    pathForm.reset();
-    document.getElementById('pathColor').value = '#FF6B6B';
     wachtfuehrerMembers = [];
     crewMembers = [];
-    document.getElementById('wachtfuehrerList').innerHTML = '';
-    document.getElementById('crewList').innerHTML = '';
 });
 
 // Draw path on map
@@ -343,7 +393,10 @@ function drawPath(pathData) {
             <strong>${pathData.title}</strong><br>
             <small><strong>Dates:</strong> ${pathData.dateRangeDisplay}</small>
             ${optionalDetails ? `<br>${optionalDetails}` : ''}<br>
-            <button class="delete-path-btn" data-id="${pathData.id}" style="margin-top: 8px; width: 100%; padding: 4px; background: #e74c3c; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 11px;">Delete Path</button>
+            <div style="display: flex; gap: 6px; margin-top: 8px;">
+                <button class="edit-path-btn" data-id="${pathData.id}" style="flex: 1; padding: 4px; background: #3498db; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 11px;">Edit Trip</button>
+                <button class="delete-path-btn" data-id="${pathData.id}" style="flex: 1; padding: 4px; background: #e74c3c; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 11px;">Delete Path</button>
+            </div>
         </div>
     `;
     
@@ -481,6 +534,13 @@ document.head.appendChild(style);
 
 // Handle delete button clicks in popups
 map.on('popupopen', function() {
+    const editBtn = document.querySelector('.edit-path-btn');
+    if (editBtn) {
+        editBtn.addEventListener('click', function() {
+            editPath(Number(this.getAttribute('data-id')));
+        });
+    }
+
     const deleteBtn = document.querySelector('.delete-path-btn');
     if (deleteBtn) {
         deleteBtn.addEventListener('click', function() {
