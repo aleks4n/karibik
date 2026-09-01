@@ -70,7 +70,44 @@
     <!-- Leaflet JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     
-    <!-- Firebase SDK Module (Official CDN approach) -->
-    <script type="module" src="app.js"></script>
+    <!-- Firebase SDK from jsDelivr CDN (UMD format) -->
+    <script src="https://cdn.jsdelivr.net/npm/firebase@10.7.0/app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/firebase@10.7.0/database.js"></script>
+    
+    <!-- Firebase Initialization & App -->
+    <script>
+        // Firebase initialization
+        const firebaseConfig = {
+            apiKey: "AIzaSyBUVBsn2DOvsfzfBH-xLSpiwA9Xnuslvik",
+            authDomain: "karibik-saison.firebaseapp.com",
+            databaseURL: "https://karibik-saison-default-rtdb.firebaseio.com",
+            projectId: "karibik-saison",
+            storageBucket: "karibik-saison.firebasestorage.app",
+            messagingSenderId: "95625990195",
+            appId: "1:95625990195:web:58c986f2298cfa0f9e9346"
+        };
+        
+        // Initialize Firebase when ready
+        let initRetries = 0;
+        function tryInitFirebase() {
+            if (typeof firebase !== 'undefined') {
+                try {
+                    firebase.initializeApp(firebaseConfig);
+                    console.log('✅ Firebase initialized!');
+                } catch (e) {
+                    console.log('Firebase already initialized');
+                }
+            } else if (initRetries < 50) {
+                initRetries++;
+                setTimeout(tryInitFirebase, 100);
+            }
+        }
+        
+        // Start trying to initialize
+        tryInitFirebase();
+    </script>
+    
+    <!-- App Script (loaded after Firebase CDN) -->
+    <script src="app.js"></script>
 </body>
 </html>

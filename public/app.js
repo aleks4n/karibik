@@ -1,24 +1,3 @@
-// Import Firebase functions
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-import { getDatabase, ref, get, set, remove, onChildAdded, onChildRemoved, onChildChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyBUVBsn2DOvsfzfBH-xLSpiwA9Xnuslvik",
-    authDomain: "karibik-saison.firebaseapp.com",
-    databaseURL: "https://karibik-saison-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "karibik-saison",
-    storageBucket: "karibik-saison.firebasestorage.app",
-    messagingSenderId: "95625990195",
-    appId: "1:95625990195:web:58c986f2298cfa0f9e9346",
-    measurementId: "G-DM9Y1DF9T3"
-  };
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const database = getDatabase(app);
-
-console.log('✅ Firebase initialized!');
-
 // Initialize the map
 const map = L.map('map').setView([15, -60], 4);
 
@@ -44,11 +23,22 @@ let drawnLines = [];
 let drawnMarkers = [];
 let wachtfuehrerMembers = [];
 let crewMembers = [];
-let pathsRef = ref(database, 'shared/paths');
+let pathsRef = null;
 let drawnPathsMap = new Map();
 
 // Initialize Firebase and load paths immediately
 function initializeApp() {
+    // Wait for Firebase to be initialized
+    if (!firebase.apps || firebase.apps.length === 0) {
+        console.warn('⏳ Firebase not ready yet, retrying...');
+        setTimeout(initializeApp, 100);
+        return;
+    }
+    
+    // Get database reference
+    const database = firebase.database();
+    pathsRef = database.ref('shared/paths');
+    
     // Load existing paths
     loadPathsFromFirebase();
     
