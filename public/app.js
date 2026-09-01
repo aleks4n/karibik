@@ -231,16 +231,6 @@ pathForm.addEventListener('submit', (e) => {
         .map(input => input.value.trim())
         .filter(name => name !== '');
     
-    if (wachtfuehrerList.length === 0) {
-        alert('Please add at least one Wachführer');
-        return;
-    }
-    
-    if (crewList.length === 0) {
-        alert('Please add at least one Crew member');
-        return;
-    }
-    
     const startDate = new Date(document.getElementById('startDate').value);
     const endDate = new Date(document.getElementById('endDate').value);
     
@@ -250,11 +240,11 @@ pathForm.addEventListener('submit', (e) => {
     
     const newPath = {
         id: Date.now(),
-        title: document.getElementById('pathTitle').value,
+        title: document.getElementById('pathTitle').value.trim(),
         startDate: document.getElementById('startDate').value,
         endDate: document.getElementById('endDate').value,
         dateRangeDisplay: `${startDateStr} - ${endDateStr}`,
-        skipper: document.getElementById('skipper').value,
+        skipper: document.getElementById('skipper').value.trim(),
         wachtfuehrer: wachtfuehrerList,
         crew: crewList,
         color: document.getElementById('pathColor').value,
@@ -289,13 +279,23 @@ function drawPath(pathData) {
         ? pathData.crew.join(', ') 
         : pathData.crew;
     
+    const optionalDetails = [
+        pathData.skipper
+            ? `<small><strong>Skipper:</strong> ${pathData.skipper}</small>`
+            : '',
+        wachtfuehrerStr
+            ? `<small><strong>Wachführer:</strong> ${wachtfuehrerStr}</small>`
+            : '',
+        crewStr
+            ? `<small><strong>Crew:</strong> ${crewStr}</small>`
+            : ''
+    ].filter(Boolean).join('<br>');
+
     const popupContent = `
         <div class="path-popup">
             <strong>${pathData.title}</strong><br>
-            <small><strong>Dates:</strong> ${pathData.dateRangeDisplay}</small><br>
-            <small><strong>Skipper:</strong> ${pathData.skipper}</small><br>
-            <small><strong>Wachführer:</strong> ${wachtfuehrerStr}</small><br>
-            <small><strong>Crew:</strong> ${crewStr}</small><br>
+            <small><strong>Dates:</strong> ${pathData.dateRangeDisplay}</small>
+            ${optionalDetails ? `<br>${optionalDetails}` : ''}<br>
             <button class="delete-path-btn" data-id="${pathData.id}" style="margin-top: 8px; width: 100%; padding: 4px; background: #e74c3c; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 11px;">Delete Path</button>
         </div>
     `;
