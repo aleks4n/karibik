@@ -29,7 +29,11 @@ let drawnPathsMap = new Map();
 // Initialize Firebase and load paths immediately
 function initializeApp() {
     // Wait for Firebase to be initialized
-    if (!firebase.apps || firebase.apps.length === 0) {
+    if (
+        typeof firebase === 'undefined' ||
+        !firebase.apps ||
+        firebase.apps.length === 0
+    ) {
         console.warn('⏳ Firebase not ready yet, retrying...');
         setTimeout(initializeApp, 100);
         return;
