@@ -1,0 +1,21 @@
+{
+  "name": "interactive-world-map",
+  "version": "1.0.0",
+  "description": "Interactive world map with zoom and pan capabilities",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "map",
+    "leaflet",
+    "interactive"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "firebase": "^12.18.0"
+  }
+}

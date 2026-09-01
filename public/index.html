@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Karibik Saison</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⛵ Karibik Saison</h1>
+            <div class="controls">
+                <button id="createPath" class="btn btn-primary">➕ Create Path</button>
+                <button id="zoomIn" class="btn">🔍+ Zoom In</button>
+                <button id="zoomOut" class="btn">🔍- Zoom Out</button>
+                <button id="reset" class="btn">↺ Reset View</button>                <button id="clearAll" class="btn btn-danger">🗑️ Clear All</button>            </div>
+        </div>
+        
+        <!-- Map Container -->
+        <div id="map"></div>
+        
+        <!-- Path Creation Modal -->
+        <div id="pathModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Create New Sailing Path</h2>
+                <form id="pathForm">
+                    <div class="form-group">
+                        <label>Path Title</label>
+                        <input type="text" id="pathTitle" required placeholder="e.g., Caribbean Adventure">
+                    </div>
+                    <div class="form-group">
+                        <label>Start Date</label>
+                        <input type="date" id="startDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>End Date</label>
+                        <input type="date" id="endDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Skipper</label>
+                        <input type="text" id="skipper" required placeholder="Skipper name">
+                    </div>
+                    <div class="form-group">
+                        <label>Wachführer</label>
+                        <div id="wachtfuehrerList" class="dynamic-list"></div>
+                        <button type="button" id="addWachtfuehrer" class="btn btn-small">+ Add Wachführer</button>
+                    </div>
+                    <div class="form-group">
+                        <label>Crew</label>
+                        <div id="crewList" class="dynamic-list"></div>
+                        <button type="button" id="addCrew" class="btn btn-small">+ Add Crew Member</button>
+                    </div>
+                    <div class="form-group">
+                        <label>Path Color</label>
+                        <input type="color" id="pathColor" value="#FF6B6B">
+                    </div>
+                    <p class="info-text">Click on the map to select start and end points.</p>
+                    <button type="submit" class="btn btn-primary">Save Path</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    
+    <!-- Firebase Config (ES6 module) -->
+    <script type="module" defer src="firebase-config.js"></script>
+    
+    <!-- App Script -->
+    <script defer src="app.js"></script>
+</body>
+</html>
