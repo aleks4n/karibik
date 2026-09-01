@@ -52,21 +52,29 @@ initializeApp();
 
 // Load paths from Firebase
 function loadPathsFromFirebase() {
-    if (!pathsRef) return;
+    if (!pathsRef) {
+        console.warn('pathsRef not initialized yet');
+        return;
+    }
     
     window.firebase.get(pathsRef).then((snapshot) => {
         if (snapshot.exists()) {
             const data = snapshot.val();
-            paths = Object.values(data);
-            paths.forEach(path => {
-                if (!drawnPathsMap.has(path.id)) {
-                    drawPath(path);
-                }
-            });
-            console.log(`Loaded ${paths.length} path(s) from Firebase`);
+            if (data && typeof data === 'object') {
+                paths = Object.values(data).filter(p => p && p.id);
+                paths.forEach(path => {
+                    if (!drawnPathsMap.has(path.id)) {
+                        drawPath(path);
+                    }
+                });
+                console.log(`✅ Loaded ${paths.length} path(s) from Firebase`);
+            }
+        } else {
+            console.log('No paths found in Firebase yet');
+            paths = [];
         }
     }).catch(error => {
-        console.error('Error loading paths:', error);
+        console.error('❌ Error loading paths from Firebase:', error.message);
     });
 }
 
@@ -111,16 +119,19 @@ function setupRealtimeListener() {
 
 // Save path to Firebase
 function savePathToFirebase(newPath) {
-    if (!pathsRef) return;
+    if (!pathsRef) {
+        console.error('❌ pathsRef not initialized');
+        return;
+    }
     
     const pathChildRef = window.firebase.ref(`shared/paths/${newPath.id}`);
     window.firebase.set(pathChildRef, newPath)
         .then(() => {
-            console.log('Path saved to Firebase');
+            console.log('✅ Path saved to Firebase:', newPath.title);
         })
         .catch(error => {
-            console.error('Error saving path:', error);
-            alert('Error saving path to Firebase');
+            console.error('❌ Error saving path to Firebase:', error.message);
+            alert('Error saving path: ' + error.message);
         });
 }
 
