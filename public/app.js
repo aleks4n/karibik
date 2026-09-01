@@ -28,15 +28,16 @@ let drawnPathsMap = new Map();
 
 // Initialize Firebase and load paths immediately
 function initializeApp() {
-    // Wait for Firebase to be available
-    if (!window.firebase) {
-        console.warn('Firebase not ready yet, retrying...');
+    // Wait for Firebase to be initialized
+    if (!firebase.apps || firebase.apps.length === 0) {
+        console.warn('⏳ Firebase not ready yet, retrying...');
         setTimeout(initializeApp, 100);
         return;
     }
     
-    // Set up Firebase reference for shared paths
-    pathsRef = window.firebase.ref('shared/paths');
+    // Get database reference
+    const database = firebase.database();
+    pathsRef = database.ref('shared/paths');
     
     // Load existing paths
     loadPathsFromFirebase();
@@ -57,7 +58,7 @@ function loadPathsFromFirebase() {
         return;
     }
     
-    window.firebase.get(pathsRef).then((snapshot) => {
+    pathsRef.once('value', (snapshot) => {
         if (snapshot.exists()) {
             const data = snapshot.val();
             if (data && typeof data === 'object') {
@@ -83,7 +84,7 @@ function setupRealtimeListener() {
     if (!pathsRef) return;
     
     // Listen for new paths
-    window.firebase.onChildAdded(pathsRef, (snapshot) => {
+    pathsRef.on('child_added', (snapshot) => {
         const path = snapshot.val();
         if (path && !drawnPathsMap.has(path.id)) {
             paths.push(path);
@@ -93,7 +94,7 @@ function setupRealtimeListener() {
     });
     
     // Listen for removed paths
-    window.firebase.onChildRemoved(pathsRef, (snapshot) => {
+    pathsRef.on('child_removed', (snapshot) => {
         const path = snapshot.val();
         if (path) {
             paths = paths.filter(p => p.id !== path.id);
@@ -103,7 +104,7 @@ function setupRealtimeListener() {
     });
     
     // Listen for updated paths
-    window.firebase.onChildChanged(pathsRef, (snapshot) => {
+    pathsRef.on('child_changed', (snapshot) => {
         const path = snapshot.val();
         if (path) {
             const index = paths.findIndex(p => p.id === path.id);
@@ -124,8 +125,7 @@ function savePathToFirebase(newPath) {
         return;
     }
     
-    const pathChildRef = window.firebase.ref(`shared/paths/${newPath.id}`);
-    window.firebase.set(pathChildRef, newPath)
+    pathsRef.child(newPath.id).set(newPath)
         .then(() => {
             console.log('✅ Path saved to Firebase:', newPath.title);
         })
@@ -139,8 +139,7 @@ function savePathToFirebase(newPath) {
 function deletePathFromFirebase(pathId) {
     if (!pathsRef) return;
     
-    const pathChildRef = window.firebase.ref(`shared/paths/${pathId}`);
-    window.firebase.remove(pathChildRef)
+    pathsRef.child(pathId).remove()
         .then(() => {
             console.log('Path deleted from Firebase');
         })
@@ -386,7 +385,7 @@ document.getElementById('reset').addEventListener('click', () => {
 document.getElementById('clearAll').addEventListener('click', () => {
     if (confirm('Are you sure you want to delete ALL paths? This cannot be undone.')) {
         if (pathsRef) {
-            window.firebase.remove(pathsRef).then(() => {
+            pathsRef.remove().then(() => {
                 paths = [];
                 drawnPathsMap.forEach(line => map.removeLayer(line));
                 drawnPathsMap.clear();

@@ -70,12 +70,13 @@
     <!-- Leaflet JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     
-    <!-- Firebase SDK (CDN - global scope) -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js"></script>
+    <!-- Firebase SDK (Compat version for global scope) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-compat-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-compat-database.js"></script>
     
-    <!-- Firebase Initialization (inlined) -->
+    <!-- Firebase Initialization & App -->
     <script>
+        // Firebase initialization
         const firebaseConfig = {
             apiKey: "AIzaSyBUVBsn2DOvsfzfBH-xLSpiwA9Xnuslvik",
             authDomain: "karibik-saison.firebaseapp.com",
@@ -86,33 +87,23 @@
             appId: "1:95625990195:web:58c986f2298cfa0f9e9346"
         };
         
-        // Wait for Firebase SDK then initialize
-        let retries = 0;
-        function initFirebase() {
-            if (typeof firebase !== 'undefined') {
+        // Initialize Firebase when ready
+        let initRetries = 0;
+        function tryInitFirebase() {
+            if (typeof firebase !== 'undefined' && firebase.apps.length === 0) {
                 firebase.initializeApp(firebaseConfig);
-                const database = firebase.database();
-                window.firebase = {
-                    database: () => database,
-                    ref: (path) => firebase.database().ref(path),
-                    get: (ref) => ref.once('value'),
-                    set: (ref, data) => ref.set(data),
-                    remove: (ref) => ref.remove(),
-                    onValue: (ref, callback) => ref.on('value', callback),
-                    onChildAdded: (ref, callback) => ref.on('child_added', callback),
-                    onChildRemoved: (ref, callback) => ref.on('child_removed', callback),
-                    onChildChanged: (ref, callback) => ref.on('child_changed', callback)
-                };
-                console.log('✅ Firebase initialized - Shared collaborative map ready!');
-            } else if (retries < 50) {
-                retries++;
-                setTimeout(initFirebase, 100);
+                console.log('✅ Firebase initialized!');
+            } else if (initRetries < 50) {
+                initRetries++;
+                setTimeout(tryInitFirebase, 100);
             }
         }
-        initFirebase();
+        
+        // Start trying to initialize
+        tryInitFirebase();
     </script>
     
-    <!-- App Script -->
+    <!-- App Script (loaded after Firebase CDN) -->
     <script src="app.js"></script>
 </body>
 </html>
