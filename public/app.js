@@ -14,6 +14,53 @@ const initialLat = 15;
 const initialLng = -60;
 const initialZoom = 4;
 
+// Search for a city or island and move the map to the first result.
+const locationSearch = document.getElementById('locationSearch');
+const locationQuery = document.getElementById('locationQuery');
+const searchLocationBtn = document.getElementById('searchLocation');
+
+locationSearch.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const query = locationQuery.value.trim();
+    if (!query) return;
+
+    searchLocationBtn.disabled = true;
+    searchLocationBtn.textContent = 'Searching…';
+
+    try {
+        const params = new URLSearchParams({
+            q: query,
+            format: 'jsonv2',
+            limit: '1'
+        });
+        const response = await fetch(`https://nominatim.openstreetmap.org/search?${params}`);
+
+        if (!response.ok) {
+            throw new Error(`Location search failed with status ${response.status}`);
+        }
+
+        const results = await response.json();
+        if (results.length === 0) {
+            alert(`No location found for “${query}”.`);
+            return;
+        }
+
+        const result = results[0];
+        const bounds = result.boundingbox.map(Number);
+        map.fitBounds([
+            [bounds[0], bounds[2]],
+            [bounds[1], bounds[3]]
+        ], { maxZoom: 12, padding: [30, 30] });
+    } catch (error) {
+        console.error('Location search error:', error);
+        alert('The location search is temporarily unavailable. Please try again.');
+    } finally {
+        searchLocationBtn.disabled = false;
+        searchLocationBtn.textContent = '🔎 Search';
+    }
+});
+
 // Path storage and creation state
 let paths = [];
 let isCreatingPath = false;

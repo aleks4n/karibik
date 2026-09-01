@@ -48,6 +48,29 @@ body {
     flex-wrap: wrap;
 }
 
+.location-search {
+    display: flex;
+    gap: 6px;
+}
+
+.location-search input {
+    width: 210px;
+    border: 1px solid #bdc3c7;
+    border-radius: 4px;
+    padding: 8px 10px;
+    font-size: 13px;
+}
+
+.location-search input:focus {
+    border-color: #3498db;
+    outline: 2px solid rgba(52, 152, 219, 0.3);
+}
+
+.location-search .btn:disabled {
+    cursor: wait;
+    opacity: 0.7;
+}
+
 .btn {
     background: #3498db;
     color: white;

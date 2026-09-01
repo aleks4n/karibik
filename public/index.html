@@ -15,6 +15,16 @@
         <div class="header">
             <h1>⛵ Karibik Saison</h1>
             <div class="controls">
+                <form id="locationSearch" class="location-search" role="search">
+                    <input
+                        type="search"
+                        id="locationQuery"
+                        placeholder="Search city or island"
+                        aria-label="Search for a city or island"
+                        required
+                    >
+                    <button type="submit" id="searchLocation" class="btn">🔎 Search</button>
+                </form>
                 <button id="createPath" class="btn btn-primary">➕ Create Path</button>
                 <button id="zoomIn" class="btn">🔍+ Zoom In</button>
                 <button id="zoomOut" class="btn">🔍- Zoom Out</button>
