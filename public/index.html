@@ -70,10 +70,12 @@
     <!-- Leaflet JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     
-    <!-- Firebase Config (ES6 module) -->
-    <script type="module" defer src="firebase-config.js"></script>
+    <!-- Firebase SDK (CDN - global scope) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js"></script>
     
-    <!-- App Script -->
-    <script defer src="app.js"></script>
+    <!-- Firebase Config & App Scripts -->
+    <script src="firebase-config.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
