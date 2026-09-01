@@ -20,6 +20,7 @@ let isCreatingPath = false;
 let pathPoints = [];
 let currentPathColor = '#FF6B6B';
 let drawnLines = [];
+let drawnMarkers = [];
 let wachtfuehrerMembers = [];
 let crewMembers = [];
 let pathsRef = null;
@@ -174,6 +175,8 @@ function closeModal() {
     pathPoints = [];
     drawnLines.forEach(line => map.removeLayer(line));
     drawnLines = [];
+    drawnMarkers.forEach(marker => map.removeLayer(marker));
+    drawnMarkers = [];
     map.dragging.enable();
     // Clear dynamic lists
     document.getElementById('wachtfuehrerList').innerHTML = '';
@@ -330,13 +333,14 @@ map.on('click', (e) => {
         pathPoints.push(e.latlng);
         
         // Draw marker
-        L.circleMarker(e.latlng, {
+        const marker = L.circleMarker(e.latlng, {
             radius: 8,
             color: '#2c3e50',
             fillColor: pathPoints.length === 1 ? '#27ae60' : '#e74c3c',
             fillOpacity: 0.8,
             weight: 2
         }).addTo(map);
+        drawnMarkers.push(marker);
         
         // If we have 2 points, draw line preview and open modal
         if (pathPoints.length === 2) {
