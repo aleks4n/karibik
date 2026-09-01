@@ -53,29 +53,21 @@ initializeApp();
 
 // Load paths from Firebase
 function loadPathsFromFirebase() {
-    if (!pathsRef) {
-        console.warn('pathsRef not initialized yet');
-        return;
-    }
+    if (!pathsRef) return;
     
     pathsRef.once('value', (snapshot) => {
         if (snapshot.exists()) {
             const data = snapshot.val();
-            if (data && typeof data === 'object') {
-                paths = Object.values(data).filter(p => p && p.id);
-                paths.forEach(path => {
-                    if (!drawnPathsMap.has(path.id)) {
-                        drawPath(path);
-                    }
-                });
-                console.log(`✅ Loaded ${paths.length} path(s) from Firebase`);
-            }
-        } else {
-            console.log('No paths found in Firebase yet');
-            paths = [];
+            paths = Object.values(data);
+            paths.forEach(path => {
+                if (!drawnPathsMap.has(path.id)) {
+                    drawPath(path);
+                }
+            });
+            console.log(`Loaded ${paths.length} path(s) from Firebase`);
         }
     }).catch(error => {
-        console.error('❌ Error loading paths from Firebase:', error.message);
+        console.error('Error loading paths:', error);
     });
 }
 
@@ -120,18 +112,15 @@ function setupRealtimeListener() {
 
 // Save path to Firebase
 function savePathToFirebase(newPath) {
-    if (!pathsRef) {
-        console.error('❌ pathsRef not initialized');
-        return;
-    }
+    if (!pathsRef) return;
     
     pathsRef.child(newPath.id).set(newPath)
         .then(() => {
-            console.log('✅ Path saved to Firebase:', newPath.title);
+            console.log('Path saved to Firebase');
         })
         .catch(error => {
-            console.error('❌ Error saving path to Firebase:', error.message);
-            alert('Error saving path: ' + error.message);
+            console.error('Error saving path:', error);
+            alert('Error saving path to Firebase');
         });
 }
 
