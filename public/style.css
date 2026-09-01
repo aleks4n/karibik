@@ -108,11 +108,90 @@ body {
     background: #c0392b;
 }
 
+.map-layout {
+    flex: 1;
+    display: flex;
+    min-height: 0;
+}
+
+.trips-sidebar {
+    width: 260px;
+    flex: 0 0 260px;
+    overflow-y: auto;
+    background: #f8fafb;
+    border-right: 1px solid #dfe6e9;
+    padding: 18px 14px;
+    z-index: 2;
+}
+
+.trips-sidebar h2 {
+    color: #2c3e50;
+    font-size: 20px;
+    margin-bottom: 14px;
+}
+
+.trips-list {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.trip-list-item {
+    width: 100%;
+    padding: 10px 11px;
+    border: 1px solid #dfe6e9;
+    border-left: 4px solid var(--trip-color, #3498db);
+    border-radius: 5px;
+    background: white;
+    color: #2c3e50;
+    cursor: pointer;
+    text-align: left;
+}
+
+.trip-list-item:hover,
+.trip-list-item:focus-visible {
+    background: #edf6fc;
+    border-color: #b8d8ec;
+    outline: none;
+}
+
+.trip-list-title,
+.trip-list-dates {
+    display: block;
+}
+
+.trip-list-title {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 3px;
+}
+
+.trip-list-dates,
+.trips-empty {
+    color: #667;
+    font-size: 12px;
+}
+
 #map {
     flex: 1;
+    min-width: 0;
     width: 100%;
     z-index: 1;
     background: #e8f4f8;
+}
+
+@media (max-width: 700px) {
+    .map-layout {
+        flex-direction: column;
+    }
+
+    .trips-sidebar {
+        width: 100%;
+        flex: 0 0 auto;
+        max-height: 180px;
+        border-right: none;
+        border-bottom: 1px solid #dfe6e9;
+    }
 }
 
 /* Modal Styles */

@@ -74,6 +74,50 @@ let pathsRef = null;
 let drawnPathsMap = new Map();
 let editingPathId = null;
 
+function renderTripsList() {
+    const tripsList = document.getElementById('tripsList');
+    tripsList.replaceChildren();
+
+    if (paths.length === 0) {
+        const emptyMessage = document.createElement('p');
+        emptyMessage.className = 'trips-empty';
+        emptyMessage.textContent = 'No trips yet';
+        tripsList.appendChild(emptyMessage);
+        return;
+    }
+
+    const sortedPaths = [...paths].sort((a, b) => {
+        const firstDate = new Date(a.startDate).getTime();
+        const secondDate = new Date(b.startDate).getTime();
+        return firstDate - secondDate;
+    });
+
+    sortedPaths.forEach(path => {
+        const item = document.createElement('button');
+        item.type = 'button';
+        item.className = 'trip-list-item';
+        item.style.setProperty('--trip-color', path.color || '#3498db');
+
+        const title = document.createElement('span');
+        title.className = 'trip-list-title';
+        title.textContent = path.title;
+
+        const dates = document.createElement('span');
+        dates.className = 'trip-list-dates';
+        dates.textContent = path.dateRangeDisplay || `${path.startDate} – ${path.endDate}`;
+
+        item.append(title, dates);
+        item.addEventListener('click', () => {
+            const line = drawnPathsMap.get(path.id);
+            if (line) {
+                map.fitBounds(line.getBounds(), { padding: [40, 40], maxZoom: 10 });
+                line.openPopup();
+            }
+        });
+        tripsList.appendChild(item);
+    });
+}
+
 // Initialize Firebase and load paths immediately
 function initializeApp() {
     // Wait for Firebase to be initialized
@@ -116,6 +160,7 @@ function loadPathsFromFirebase() {
                     drawPath(path);
                 }
             });
+            renderTripsList();
             console.log(`Loaded ${paths.length} path(s) from Firebase`);
         }
     }).catch(error => {
@@ -133,6 +178,7 @@ function setupRealtimeListener() {
         if (path && !drawnPathsMap.has(path.id)) {
             paths.push(path);
             drawPath(path);
+            renderTripsList();
             console.log('New path added:', path.title);
         }
     });
@@ -143,6 +189,7 @@ function setupRealtimeListener() {
         if (path) {
             paths = paths.filter(p => p.id !== path.id);
             removePath(path.id);
+            renderTripsList();
             console.log('Path removed:', path.title);
         }
     });
@@ -157,6 +204,7 @@ function setupRealtimeListener() {
             }
             removePath(path.id);
             drawPath(path);
+            renderTripsList();
             console.log('Path updated:', path.title);
         }
     });
@@ -355,6 +403,7 @@ pathForm.addEventListener('submit', (e) => {
     }
 
     drawPath(savedPath);
+    renderTripsList();
     savePathToFirebase(savedPath);
     closeModal();
     wachtfuehrerMembers = [];
@@ -481,6 +530,7 @@ document.getElementById('clearAll').addEventListener('click', () => {
                 paths = [];
                 drawnPathsMap.forEach(line => map.removeLayer(line));
                 drawnPathsMap.clear();
+                renderTripsList();
             }).catch(error => console.error('Error clearing paths:', error));
         }
     }

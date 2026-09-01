@@ -31,8 +31,17 @@
                 <button id="reset" class="btn">↺ Reset View</button>                <button id="clearAll" class="btn btn-danger">🗑️ Clear All</button>            </div>
         </div>
         
-        <!-- Map Container -->
-        <div id="map"></div>
+        <div class="map-layout">
+            <aside class="trips-sidebar" aria-labelledby="tripsHeading">
+                <h2 id="tripsHeading">Reise</h2>
+                <div id="tripsList" class="trips-list">
+                    <p class="trips-empty">No trips yet</p>
+                </div>
+            </aside>
+
+            <!-- Map Container -->
+            <div id="map"></div>
+        </div>
         
         <!-- Path Creation Modal -->
         <div id="pathModal" class="modal">
