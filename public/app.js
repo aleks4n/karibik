@@ -309,7 +309,6 @@ function drawPath(pathData) {
     });
     
     line.on('mouseout', function() {
-        this.closePopup();
         this.setStyle({ weight: 4, opacity: 0.8 });
     });
     
