@@ -15,3 +15,4 @@ app.listen(PORT, () => {
   console.log(`🗺️  Interactive World Map is running at http://localhost:${PORT}`);
   console.log('Press Ctrl+C to stop the server');
 });
+
